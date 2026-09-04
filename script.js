@@ -1,15 +1,28 @@
 // Чайная ложка сахара ≈ 5 г (стандартная оценка, используется в популярной нутрициологии)
 const TSP_GRAMS = 5;
 
-// Сахар «спрятан» в типичной порции напитка
+// Примерное содержание сахара (г на 100 мл) — усреднённые данные из открытых
+// источников (составы производителей, справочники по питанию). Значения
+// округлены и не претендуют на точность конкретной партии продукта —
+// этого достаточно для школьного проекта.
 const DRINKS = [
-  { name: "Газировка (0,33 л)", grams: 35 },
-  { name: "Апельсиновый сок (0,33 л)", grams: 33 },
-  { name: "Энергетик (0,33 л)", grams: 39 },
-  { name: "Холодный чай (0,33 л)", grams: 30 },
-  { name: "Спортивный напиток (0,5 л)", grams: 21 },
-  { name: "Какао / молочный коктейль (0,25 л)", grams: 25 },
-  { name: "Домашний компот без сахара (0,33 л)", grams: 10 },
+  { name: "Кола", sugarPer100: 10.6, volumeMl: 330 },
+  { name: "Кола Zero / без сахара", sugarPer100: 0, volumeMl: 330 },
+  { name: "Пепси", sugarPer100: 11, volumeMl: 330 },
+  { name: "Фанта (апельсин)", sugarPer100: 12, volumeMl: 330 },
+  { name: "Спрайт", sugarPer100: 9, volumeMl: 330 },
+  { name: "Лимонад (дюшес, крем-сода)", sugarPer100: 11, volumeMl: 330 },
+  { name: "Тоник", sugarPer100: 8, volumeMl: 330 },
+  { name: "Энергетик", sugarPer100: 11, volumeMl: 330 },
+  { name: "Апельсиновый сок (100%)", sugarPer100: 9, volumeMl: 330 },
+  { name: "Яблочный сок", sugarPer100: 10.5, volumeMl: 330 },
+  { name: "Виноградный сок", sugarPer100: 15, volumeMl: 330 },
+  { name: "Фруктовый смузи (магазинный)", sugarPer100: 11, volumeMl: 250 },
+  { name: "Холодный чай (бутилированный)", sugarPer100: 7.2, volumeMl: 330 },
+  { name: "Спортивный напиток / изотоник", sugarPer100: 6, volumeMl: 500 },
+  { name: "Какао / молочный коктейль", sugarPer100: 10, volumeMl: 250 },
+  { name: "Квас", sugarPer100: 5, volumeMl: 330 },
+  { name: "Домашний компот без сахара", sugarPer100: 3, volumeMl: 330 },
 ];
 
 // Для сравнения с блоком 2
@@ -35,17 +48,29 @@ function renderSpoons(count) {
   }
 }
 
+function drinkVolumeLabel(drink) {
+  const liters = drink.volumeMl / 1000;
+  return `${liters.toString().replace(".", ",")} л`;
+}
+
 function updateResult(drink) {
-  const tsp = drink.grams / TSP_GRAMS;
+  const grams = Math.round((drink.sugarPer100 * drink.volumeMl) / 100);
+  const tsp = grams / TSP_GRAMS;
   const tspRounded = Math.round(tsp * 10) / 10;
 
   document.getElementById("sugar-tsp").textContent = tspRounded;
-  document.getElementById("sugar-grams").textContent = `≈ ${drink.grams} г сахара`;
+  document.getElementById("sugar-grams").textContent = `≈ ${grams} г сахара (${drinkVolumeLabel(drink)})`;
   renderSpoons(tsp);
 
-  const apples = Math.round((drink.grams / WILD_APPLE_GRAMS) * 10) / 10;
-  document.getElementById("compare-line").textContent =
-    `Это как съесть примерно ${apples} диких яблока подряд — то, что в природе растянулось бы на весь сезон.`;
+  const compareLine = document.getElementById("compare-line");
+  if (grams === 0) {
+    compareLine.textContent =
+      "Сахара здесь нет — вкус создают подсластители, а не сахароза.";
+  } else {
+    const apples = Math.round((grams / WILD_APPLE_GRAMS) * 10) / 10;
+    compareLine.textContent =
+      `Это как съесть примерно ${apples} диких яблока подряд — то, что в природе растянулось бы на весь сезон.`;
+  }
 
   const percentOfLimit = Math.min((tsp / WHO_UPPER_LIMIT_TSP) * 100, 100);
   document.getElementById("who-bar-fill").style.width = `${percentOfLimit}%`;
@@ -57,7 +82,7 @@ function setupCalculator() {
   DRINKS.forEach((drink, index) => {
     const option = document.createElement("option");
     option.value = index;
-    option.textContent = drink.name;
+    option.textContent = `${drink.name} (${drinkVolumeLabel(drink)})`;
     select.appendChild(option);
   });
 
