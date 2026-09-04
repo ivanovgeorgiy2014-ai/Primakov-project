@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Почему мы не можем остановиться после одной конфеты?</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- БЛОК 1. Главная страница -->
+  <section id="intro" class="section hero">
+    <div class="container hero-content">
+      <p class="eyebrow">Школьный проект по биологии · 7 класс</p>
+      <h1 class="hero-title">Почему мы не можем остановиться после одной конфеты?</h1>
+      <p class="hero-subtitle">
+        Дело не в силе воли. Дело в мозге, который тысячи лет учился любить сладкое —
+        и до сих пор не в курсе, что вокруг больше не пещера.
+      </p>
+      <button class="btn-primary" id="start-btn">Начать исследование ↓</button>
+    </div>
+  </section>
+
+  <!-- БЛОК 2. Меню пещерного человека -->
+  <section id="menu" class="section">
+    <div class="container">
+      <p class="section-num">01</p>
+      <h2 class="section-title">Меню пещерного человека</h2>
+      <p class="section-lead">
+        Сладкий вкус для мозга — сигнал безопасной и калорийной еды. Эта реакция закрепилась
+        за миллионы лет эволюции. Но в природе сладкое почти никогда не было доступно просто так.
+      </p>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card-icon">🍎</div>
+          <h3 class="card-title">Дикое яблоко</h3>
+          <p class="card-stat"><span class="stat-num">~10 г</span> сахара на плод</p>
+          <p class="card-desc">
+            Кислое, мелкое, доступно только осенью, пару недель в году. Чтобы наесться сладким,
+            нужно было найти дерево и успеть раньше птиц и других зверей.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon">🍯</div>
+          <h3 class="card-title">Дикий мёд</h3>
+          <p class="card-stat"><span class="stat-num">~80%</span> сахара в составе</p>
+          <p class="card-desc">
+            Самый концентрированный сладкий приз в природе. Но добыть его — почти подвиг:
+            нужно найти дупло с пчёлами, забраться к нему и пережить укусы. Такое случалось
+            от силы несколько раз в году.
+          </p>
+        </article>
+      </div>
+
+      <p class="section-footnote">
+        Итог: в природе сладкое = дефицит и праздник. Мозг, который находил его, получал
+        награду — и запоминал: «сладкое = бери, пока можно».
+      </p>
+    </div>
+  </section>
+
+  <!-- БЛОК 3. Карманный калорийный капкан (интерактив) -->
+  <section id="trap" class="section">
+    <div class="container">
+      <p class="section-num">02</p>
+      <h2 class="section-title">Карманный калорийный капкан</h2>
+      <p class="section-lead">
+        А теперь сладкое — не редкость, а любой ближайший холодильник. Выбери напиток
+        и посмотри, сколько сахара в нём спрятано на самом деле.
+      </p>
+
+      <div class="calculator">
+        <div class="calculator-controls">
+          <label for="drink-select">Выбери напиток</label>
+          <select id="drink-select"></select>
+        </div>
+
+        <div class="calculator-result">
+          <div class="spoons-visual" id="spoons-visual" aria-hidden="true"></div>
+          <p class="result-line">
+            <span class="stat-num" id="sugar-tsp">–</span> чайных ложек сахара
+            <span class="result-sub" id="sugar-grams"></span>
+          </p>
+          <p class="compare-line" id="compare-line"></p>
+        </div>
+      </div>
+
+      <div class="who-note">
+        <p>
+          <strong>Ориентир ВОЗ:</strong> не более 6–12 чайных ложек сахара в день
+          из всех продуктов вместе — не только из напитков.
+        </p>
+        <div class="who-bar">
+          <div class="who-bar-fill" id="who-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- БЛОК 4. Советы от биологии -->
+  <section id="advice" class="section">
+    <div class="container">
+      <p class="section-num">03</p>
+      <h2 class="section-title">Советы от биологии</h2>
+      <p class="section-lead">
+        Обмануть древний мозг напрямую не получится — но можно работать с ним, а не против него.
+      </p>
+
+      <div class="advice-grid">
+        <article class="advice-card">
+          <div class="advice-num">1</div>
+          <h3>Фрукт вместо сока</h3>
+          <p>
+            В целом фрукте есть клетчатка — она замедляет всасывание сахара, и мозг не получает
+            резкий дофаминовый скачок, который требует продолжения.
+          </p>
+        </article>
+
+        <article class="advice-card">
+          <div class="advice-num">2</div>
+          <h3>Не пей калории</h3>
+          <p>
+            Жидкий сахар не даёт чувства сытости так, как еда. Мозг легко пропускает
+            «лишние» калории из напитков мимо системы насыщения.
+          </p>
+        </article>
+
+        <article class="advice-card">
+          <div class="advice-num">3</div>
+          <h3>Подожди 20 минут</h3>
+          <p>
+            Дофаминовый порыв «хочу ещё» — короткий. Если отвлечься на 15–20 минут,
+            острое желание съесть сладкое обычно ослабевает само.
+          </p>
+        </article>
+      </div>
+
+      <div class="science-recap">
+        <h3>Как это работает</h3>
+        <p>
+          Глюкоза — топливо для мозга, который тратит до 20% всей энергии тела. Когда мы едим
+          сладкое, мозг выделяет дофамин — вещество системы вознаграждения.
+        </p>
+        <p class="chain">
+          Пробуем сладкое → выделяется дофамин → чувство удовольствия → хочется ещё
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Школьный проект по биологии · 7 класс</p>
+  </footer>
+
+<script src="script.js"></script>
+</body>
+</html>
