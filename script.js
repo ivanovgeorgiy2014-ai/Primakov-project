@@ -99,21 +99,136 @@ function updateResult(drink) {
   document.getElementById("who-bar-fill").style.width = `${percentOfLimit}%`;
 }
 
+function drinkLabel(drink) {
+  return `${drink.emoji} ${drink.name} (${drinkVolumeLabel(drink)})`;
+}
+
 function setupCalculator() {
-  const select = document.getElementById("drink-select");
+  const combobox = document.getElementById("drink-combobox");
+  const input = document.getElementById("drink-input");
+  const list = document.getElementById("drink-list");
+  let activeIndex = -1;
 
-  DRINKS.forEach((drink, index) => {
-    const option = document.createElement("option");
-    option.value = index;
-    option.textContent = `${drink.emoji} ${drink.name} (${drinkVolumeLabel(drink)})`;
-    select.appendChild(option);
+  function renderList(query) {
+    const q = query.trim().toLowerCase();
+    const matches = DRINKS
+      .map((drink, index) => ({ drink, index }))
+      .filter(({ drink }) => drink.name.toLowerCase().includes(q));
+
+    list.innerHTML = "";
+
+    if (matches.length === 0) {
+      const empty = document.createElement("li");
+      empty.className = "combobox-empty";
+      empty.textContent = "Ничего не найдено — попробуй другое слово";
+      list.appendChild(empty);
+      list.hidden = false;
+      return;
+    }
+
+    matches.forEach(({ drink, index }, position) => {
+      const option = document.createElement("li");
+      option.className = "combobox-option";
+      option.id = `drink-option-${index}`;
+      option.setAttribute("role", "option");
+      option.dataset.index = index;
+      option.textContent = drinkLabel(drink);
+      if (position === activeIndex) {
+        option.classList.add("is-active");
+        option.setAttribute("aria-selected", "true");
+      }
+      option.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        selectDrink(index);
+      });
+      list.appendChild(option);
+    });
+
+    list.hidden = false;
+  }
+
+  function openList() {
+    activeIndex = -1;
+    renderList(input.value);
+    input.setAttribute("aria-expanded", "true");
+  }
+
+  function closeList() {
+    list.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    activeIndex = -1;
+  }
+
+  function selectDrink(index) {
+    const drink = DRINKS[index];
+    input.value = drinkLabel(drink);
+    closeList();
+    updateResult(drink);
+  }
+
+  function updateActive(options) {
+    options.forEach((option, i) => {
+      const isActive = i === activeIndex;
+      option.classList.toggle("is-active", isActive);
+      option.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    if (activeIndex >= 0) {
+      input.setAttribute("aria-activedescendant", options[activeIndex].id);
+      options[activeIndex].scrollIntoView({ block: "nearest" });
+    } else {
+      input.removeAttribute("aria-activedescendant");
+    }
+  }
+
+  input.addEventListener("focus", () => {
+    input.select();
+    openList();
   });
 
-  select.addEventListener("change", () => {
-    updateResult(DRINKS[select.value]);
+  input.addEventListener("input", () => {
+    activeIndex = -1;
+    renderList(input.value);
   });
 
-  updateResult(DRINKS[0]);
+  input.addEventListener("keydown", (event) => {
+    if (list.hidden && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+      openList();
+      return;
+    }
+    if (list.hidden) return;
+
+    const options = Array.from(list.querySelectorAll(".combobox-option"));
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (options.length === 0) return;
+      activeIndex = (activeIndex + 1) % options.length;
+      updateActive(options);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (options.length === 0) return;
+      activeIndex = (activeIndex - 1 + options.length) % options.length;
+      updateActive(options);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (activeIndex >= 0 && options[activeIndex]) {
+        selectDrink(Number(options[activeIndex].dataset.index));
+      } else if (options.length === 1) {
+        selectDrink(Number(options[0].dataset.index));
+      }
+    } else if (event.key === "Escape") {
+      closeList();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!combobox.contains(event.target)) {
+      closeList();
+    }
+  });
+
+  selectDrink(0);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

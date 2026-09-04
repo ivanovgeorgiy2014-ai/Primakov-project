@@ -78,9 +78,23 @@
 
       <div class="calculator">
         <div class="calculator-controls">
-          <label for="drink-select">Выбери напиток</label>
-          <div class="select-wrap">
-            <select id="drink-select"></select>
+          <label for="drink-input">Выбери напиток</label>
+          <div class="combobox" id="drink-combobox">
+            <div class="combobox-field">
+              <span class="combobox-icon" aria-hidden="true">🔍</span>
+              <input
+                type="text"
+                id="drink-input"
+                class="combobox-input"
+                role="combobox"
+                aria-expanded="false"
+                aria-controls="drink-list"
+                aria-autocomplete="list"
+                autocomplete="off"
+                placeholder="Начни печатать: кола, сок, смузи…"
+              >
+            </div>
+            <ul class="combobox-list" id="drink-list" role="listbox" hidden></ul>
           </div>
         </div>
 

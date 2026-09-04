@@ -276,22 +276,25 @@ h1, h2, h3, .btn-primary, .stat-num {
   font-size: 1.05rem;
 }
 
-.select-wrap {
+.combobox {
   position: relative;
 }
 
-.select-wrap::after {
-  content: "▾";
+.combobox-field {
+  position: relative;
+}
+
+.combobox-icon {
   position: absolute;
-  right: 22px;
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--bubblegum);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  opacity: 0.6;
   pointer-events: none;
 }
 
-#drink-select {
+.combobox-input {
   width: 100%;
   font: inherit;
   font-weight: 700;
@@ -300,15 +303,55 @@ h1, h2, h3, .btn-primary, .stat-num {
   background: var(--bg-alt);
   border: 2px solid transparent;
   border-radius: 16px;
-  padding: 16px 46px 16px 18px;
-  appearance: none;
-  cursor: pointer;
+  padding: 16px 18px 16px 46px;
   transition: border-color 0.15s ease;
 }
 
-#drink-select:focus-visible {
+.combobox-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.combobox-input:focus-visible,
+.combobox-input:focus {
   border-color: var(--tangerine);
   outline: none;
+}
+
+.combobox-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.combobox-option {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.combobox-option:hover,
+.combobox-option.is-active {
+  background: var(--bg-alt);
+}
+
+.combobox-empty {
+  padding: 12px 14px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .calculator-result {
