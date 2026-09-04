@@ -68,7 +68,50 @@ function setupCalculator() {
   updateResult(DRINKS[0]);
 }
 
+function renderOwnSpoons(count) {
+  const visual = document.getElementById("own-spoons-visual");
+  visual.innerHTML = "";
+  const fullSpoons = Math.round(count);
+  for (let i = 0; i < fullSpoons; i++) {
+    const spoon = document.createElement("span");
+    spoon.className = "spoon";
+    spoon.textContent = "🥄";
+    visual.appendChild(spoon);
+  }
+}
+
+function setupOwnCalculator() {
+  const volumeInput = document.getElementById("own-volume");
+  const sugar100Input = document.getElementById("own-sugar100");
+  const resultLine = document.getElementById("own-result-line");
+
+  function update() {
+    const volume = parseFloat(volumeInput.value);
+    const sugarPer100 = parseFloat(sugar100Input.value);
+
+    if (!volume || !sugarPer100 || volume <= 0 || sugarPer100 <= 0) {
+      renderOwnSpoons(0);
+      resultLine.innerHTML = "Заполни оба поля, чтобы увидеть результат";
+      return;
+    }
+
+    const totalGrams = (volume * sugarPer100) / 100;
+    const tsp = totalGrams / TSP_GRAMS;
+    const tspRounded = Math.round(tsp * 10) / 10;
+    const gramsRounded = Math.round(totalGrams);
+
+    renderOwnSpoons(tsp);
+    resultLine.innerHTML =
+      `<span class="stat-num">${tspRounded}</span> чайных ложек сахара ` +
+      `<span class="result-sub">≈ ${gramsRounded} г сахара во всём напитке</span>`;
+  }
+
+  volumeInput.addEventListener("input", update);
+  sugar100Input.addEventListener("input", update);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupScroll();
   setupCalculator();
+  setupOwnCalculator();
 });

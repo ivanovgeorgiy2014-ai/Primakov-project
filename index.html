@@ -96,6 +96,30 @@
           <div class="who-bar-fill" id="who-bar-fill"></div>
         </div>
       </div>
+
+      <div class="own-calculator">
+        <h3 class="own-calc-title">Проверь свой напиток</h3>
+        <p class="own-calc-desc">
+          Есть под рукой этикетка? Введи данные с неё — узнай, сколько чайных ложек
+          сахара на самом деле в твоём напитке.
+        </p>
+
+        <div class="own-calc-fields">
+          <div class="field">
+            <label for="own-volume">Объём напитка, мл</label>
+            <input type="number" id="own-volume" min="0" step="1" placeholder="например, 330">
+          </div>
+          <div class="field">
+            <label for="own-sugar100">Сахар на 100 мл, г</label>
+            <input type="number" id="own-sugar100" min="0" step="0.1" placeholder="например, 10.6">
+          </div>
+        </div>
+
+        <div class="own-calc-result">
+          <div class="spoons-visual" id="own-spoons-visual" aria-hidden="true"></div>
+          <p class="result-line" id="own-result-line">Заполни оба поля, чтобы увидеть результат</p>
+        </div>
+      </div>
     </div>
   </section>
 
