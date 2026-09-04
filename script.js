@@ -55,31 +55,45 @@ function setupScroll() {
   });
 }
 
+const MAX_VISIBLE_SPOONS = 20;
+
 function renderSpoons(count) {
   const visual = document.getElementById("spoons-visual");
   visual.innerHTML = "";
   const fullSpoons = Math.round(count);
-  for (let i = 0; i < fullSpoons; i++) {
+  const shown = Math.min(fullSpoons, MAX_VISIBLE_SPOONS);
+
+  for (let i = 0; i < shown; i++) {
     const spoon = document.createElement("span");
     spoon.className = "spoon";
-    spoon.style.animationDelay = `${i * 0.04}s`;
+    spoon.style.animationDelay = `${i * 0.03}s`;
     spoon.textContent = "🥄";
     visual.appendChild(spoon);
   }
+
+  if (fullSpoons > MAX_VISIBLE_SPOONS) {
+    const extra = document.createElement("span");
+    extra.className = "spoon-extra";
+    extra.textContent = `+${fullSpoons - MAX_VISIBLE_SPOONS}`;
+    visual.appendChild(extra);
+  }
 }
 
-function drinkVolumeLabel(drink) {
-  const liters = drink.volumeMl / 1000;
-  return `${liters.toString().replace(".", ",")} л`;
+function volumeLabel(ml) {
+  if (ml >= 1000) {
+    const liters = ml / 1000;
+    return `${liters.toString().replace(".", ",")} л`;
+  }
+  return `${ml} мл`;
 }
 
-function updateResult(drink) {
-  const grams = Math.round((drink.sugarPer100 * drink.volumeMl) / 100);
+function updateResult(drink, volumeMl) {
+  const grams = Math.round((drink.sugarPer100 * volumeMl) / 100);
   const tsp = grams / TSP_GRAMS;
   const tspRounded = Math.round(tsp * 10) / 10;
 
   document.getElementById("sugar-tsp").textContent = tspRounded;
-  document.getElementById("sugar-grams").textContent = `≈ ${grams} г сахара (${drinkVolumeLabel(drink)})`;
+  document.getElementById("sugar-grams").textContent = `≈ ${grams} г сахара (${volumeLabel(volumeMl)})`;
   renderSpoons(tsp);
 
   const compareLine = document.getElementById("compare-line");
@@ -100,14 +114,24 @@ function updateResult(drink) {
 }
 
 function drinkLabel(drink) {
-  return `${drink.emoji} ${drink.name} (${drinkVolumeLabel(drink)})`;
+  return `${drink.emoji} ${drink.name}`;
 }
 
 function setupCalculator() {
   const combobox = document.getElementById("drink-combobox");
   const input = document.getElementById("drink-input");
   const list = document.getElementById("drink-list");
+  const volumeButtons = Array.from(document.querySelectorAll(".volume-option"));
   let activeIndex = -1;
+  let selectedIndex = 0;
+
+  function setVolumeButtons(ml) {
+    volumeButtons.forEach((btn) => {
+      const isSelected = Number(btn.dataset.ml) === ml;
+      btn.classList.toggle("is-selected", isSelected);
+      btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
 
   function renderList(query) {
     const q = query.trim().toLowerCase();
@@ -161,10 +185,12 @@ function setupCalculator() {
   }
 
   function selectDrink(index) {
+    selectedIndex = index;
     const drink = DRINKS[index];
     input.value = drinkLabel(drink);
     closeList();
-    updateResult(drink);
+    setVolumeButtons(drink.volumeMl);
+    updateResult(drink, drink.volumeMl);
   }
 
   function updateActive(options) {
@@ -226,6 +252,14 @@ function setupCalculator() {
     if (!combobox.contains(event.target)) {
       closeList();
     }
+  });
+
+  volumeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const ml = Number(btn.dataset.ml);
+      setVolumeButtons(ml);
+      updateResult(DRINKS[selectedIndex], ml);
+    });
   });
 
   selectDrink(0);
