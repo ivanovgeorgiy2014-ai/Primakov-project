@@ -76,9 +76,39 @@ const DRINKS = [
     swap: "латте без сиропа, с одной ложкой сахара вместо двух" },
 ];
 
+// Примерное содержание сахара (г на 1 штуку) — усреднённые данные из открытых
+// источников. Как и с напитками, значения приблизительные.
+const FOODS = [
+  { name: "Твикс (батончик)", emoji: "🍫", sugarPerUnit: 27, defaultQty: 1,
+    swap: "половину батончика сейчас, а вторую — на потом" },
+  { name: "Марс (батончик)", emoji: "🍫", sugarPerUnit: 30, defaultQty: 1,
+    swap: "мини-версию батончика вместо стандартной" },
+  { name: "Сникерс (батончик)", emoji: "🥜", sugarPerUnit: 27, defaultQty: 1,
+    swap: "горсть орехов — тоже сытно, но без такого сахара" },
+  { name: "Баунти (батончик)", emoji: "🥥", sugarPerUnit: 32, defaultQty: 1,
+    swap: "кусочек кокоса — вкус похож, а сахара почти нет" },
+  { name: "Чупа-чупс (леденец)", emoji: "🍭", sugarPerUnit: 10, defaultQty: 1,
+    note: "Не так много — а хватает надолго, если сосать медленно, а не грызть." },
+  { name: "Леденцы-карамельки", emoji: "🍬", sugarPerUnit: 4, defaultQty: 3,
+    swap: "одну карамельку вместо трёх" },
+  { name: "Мармеладные мишки", emoji: "🐻", sugarPerUnit: 3, defaultQty: 8,
+    swap: "несколько долек мандарина" },
+  { name: "Печенье", emoji: "🍪", sugarPerUnit: 4, defaultQty: 2,
+    note: "Немного — особенно если это овсяное печенье с клетчаткой." },
+  { name: "Зефир", emoji: "🍡", sugarPerUnit: 17, defaultQty: 1,
+    swap: "половину зефирки — вторую на потом" },
+  { name: "Киндер-сюрприз", emoji: "🥚", sugarPerUnit: 11, defaultQty: 1,
+    swap: "маленький кусочек тёмного шоколада" },
+  { name: "Батончик мюсли", emoji: "🌾", sugarPerUnit: 8, defaultQty: 1,
+    note: "Неплохой перекус — сахара заметно меньше, чем в шоколадном батончике." },
+  { name: "Яблоко (перекус)", emoji: "🍎", sugarPerUnit: 19, defaultQty: 1,
+    note: "Отличный перекус — это сахар целого фрукта вместе с клетчаткой." },
+];
+
 // Для сравнения с блоком 2
 const WILD_APPLE_GRAMS = 10; // сахара в одном диком яблоке
 const WHO_UPPER_LIMIT_TSP = 12; // верхняя граница дневной нормы ВОЗ, ч.л.
+const MAX_VISIBLE_SPOONS = 20;
 
 function setupScroll() {
   const startBtn = document.getElementById("start-btn");
@@ -87,10 +117,8 @@ function setupScroll() {
   });
 }
 
-const MAX_VISIBLE_SPOONS = 20;
-
-function renderSpoons(count) {
-  const visual = document.getElementById("spoons-visual");
+function renderSpoons(elementId, count) {
+  const visual = document.getElementById(elementId);
   visual.innerHTML = "";
   const fullSpoons = Math.round(count);
   const shown = Math.min(fullSpoons, MAX_VISIBLE_SPOONS);
@@ -119,47 +147,52 @@ function volumeLabel(ml) {
   return `${ml} мл`;
 }
 
-function updateResult(drink, volumeMl) {
-  const grams = Math.round((drink.sugarPer100 * volumeMl) / 100);
+// Считает чайные ложки/сравнение с яблоками/шкалу ВОЗ — общая часть для
+// калькулятора напитков и калькулятора сладостей.
+function renderSugarResult(ids, grams) {
   const tsp = grams / TSP_GRAMS;
   const tspRounded = Math.round(tsp * 10) / 10;
 
-  document.getElementById("sugar-tsp").textContent = tspRounded;
-  document.getElementById("sugar-grams").textContent = `≈ ${grams} г сахара (${volumeLabel(volumeMl)})`;
-  renderSpoons(tsp);
+  document.getElementById(ids.tsp).textContent = tspRounded;
+  renderSpoons(ids.spoons, tsp);
 
-  const compareLine = document.getElementById("compare-line");
+  const compareEl = document.getElementById(ids.compare);
   if (grams === 0) {
-    compareLine.textContent =
+    compareEl.textContent =
       "Сахара здесь нет — вкус создают подсластители, а не сахароза.";
   } else {
     const apples = Math.round((grams / WILD_APPLE_GRAMS) * 10) / 10;
-    compareLine.textContent =
+    compareEl.textContent =
       `Это как съесть примерно ${apples} диких яблока подряд — то, что в природе растянулось бы на весь сезон.`;
   }
 
-  const swapLine = document.getElementById("swap-line");
-  swapLine.textContent = drink.swap ? `🔄 Замени на: ${drink.swap}` : drink.note;
-
   const percentOfLimit = Math.min((tsp / WHO_UPPER_LIMIT_TSP) * 100, 100);
-  document.getElementById("who-bar-fill").style.width = `${percentOfLimit}%`;
+  document.getElementById(ids.whoBarFill).style.width = `${percentOfLimit}%`;
 }
 
-function drinkLabel(drink) {
-  return `${drink.emoji} ${drink.name}`;
+function setSwapLine(elementId, item) {
+  document.getElementById(elementId).textContent =
+    item.swap ? `🔄 Замени на: ${item.swap}` : item.note;
 }
 
-function setupCalculator() {
-  const combobox = document.getElementById("drink-combobox");
-  const input = document.getElementById("drink-input");
-  const list = document.getElementById("drink-list");
-  const volumeButtons = Array.from(document.querySelectorAll(".volume-option"));
+function itemLabel(item) {
+  return `${item.emoji} ${item.name}`;
+}
+
+// Общая логика для поля с поиском + кнопками количества. Используется и для
+// напитков (мл/л), и для сладостей (шт) — конфиг задаёт, откуда брать данные
+// и что делать при выборе.
+function setupSearchCalculator(config) {
+  const combobox = document.getElementById(config.comboboxId);
+  const input = document.getElementById(config.inputId);
+  const list = document.getElementById(config.listId);
+  const quantityButtons = Array.from(document.querySelectorAll(config.quantitySelector));
   let activeIndex = -1;
   let selectedIndex = 0;
 
-  function setVolumeButtons(ml) {
-    volumeButtons.forEach((btn) => {
-      const isSelected = Number(btn.dataset.ml) === ml;
+  function setQuantityButtons(qty) {
+    quantityButtons.forEach((btn) => {
+      const isSelected = Number(btn.dataset[config.quantityAttr]) === qty;
       btn.classList.toggle("is-selected", isSelected);
       btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
@@ -167,9 +200,9 @@ function setupCalculator() {
 
   function renderList(query) {
     const q = query.trim().toLowerCase();
-    const matches = DRINKS
-      .map((drink, index) => ({ drink, index }))
-      .filter(({ drink }) => drink.name.toLowerCase().includes(q));
+    const matches = config.items
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.name.toLowerCase().includes(q));
 
     list.innerHTML = "";
 
@@ -182,20 +215,20 @@ function setupCalculator() {
       return;
     }
 
-    matches.forEach(({ drink, index }, position) => {
+    matches.forEach(({ item, index }, position) => {
       const option = document.createElement("li");
       option.className = "combobox-option";
-      option.id = `drink-option-${index}`;
+      option.id = `${config.inputId}-option-${index}`;
       option.setAttribute("role", "option");
       option.dataset.index = index;
-      option.textContent = drinkLabel(drink);
+      option.textContent = itemLabel(item);
       if (position === activeIndex) {
         option.classList.add("is-active");
         option.setAttribute("aria-selected", "true");
       }
       option.addEventListener("mousedown", (event) => {
         event.preventDefault();
-        selectDrink(index);
+        selectItem(index);
       });
       list.appendChild(option);
     });
@@ -216,13 +249,14 @@ function setupCalculator() {
     activeIndex = -1;
   }
 
-  function selectDrink(index) {
+  function selectItem(index) {
     selectedIndex = index;
-    const drink = DRINKS[index];
-    input.value = drinkLabel(drink);
+    const item = config.items[index];
+    input.value = itemLabel(item);
     closeList();
-    setVolumeButtons(drink.volumeMl);
-    updateResult(drink, drink.volumeMl);
+    const qty = config.getDefaultQuantity(item);
+    setQuantityButtons(qty);
+    config.onSelect(item, qty);
   }
 
   function updateActive(options) {
@@ -271,9 +305,9 @@ function setupCalculator() {
     } else if (event.key === "Enter") {
       event.preventDefault();
       if (activeIndex >= 0 && options[activeIndex]) {
-        selectDrink(Number(options[activeIndex].dataset.index));
+        selectItem(Number(options[activeIndex].dataset.index));
       } else if (options.length === 1) {
-        selectDrink(Number(options[0].dataset.index));
+        selectItem(Number(options[0].dataset.index));
       }
     } else if (event.key === "Escape") {
       closeList();
@@ -286,18 +320,63 @@ function setupCalculator() {
     }
   });
 
-  volumeButtons.forEach((btn) => {
+  quantityButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const ml = Number(btn.dataset.ml);
-      setVolumeButtons(ml);
-      updateResult(DRINKS[selectedIndex], ml);
+      const qty = Number(btn.dataset[config.quantityAttr]);
+      setQuantityButtons(qty);
+      config.onSelect(config.items[selectedIndex], qty);
     });
   });
 
-  selectDrink(0);
+  selectItem(0);
+}
+
+function setupDrinkCalculator() {
+  setupSearchCalculator({
+    items: DRINKS,
+    comboboxId: "drink-combobox",
+    inputId: "drink-input",
+    listId: "drink-list",
+    quantitySelector: "#drink-quantity-picker .volume-option",
+    quantityAttr: "ml",
+    getDefaultQuantity: (drink) => drink.volumeMl,
+    onSelect: (drink, volumeMl) => {
+      const grams = Math.round((drink.sugarPer100 * volumeMl) / 100);
+      document.getElementById("sugar-grams").textContent =
+        `≈ ${grams} г сахара (${volumeLabel(volumeMl)})`;
+      renderSugarResult(
+        { tsp: "sugar-tsp", spoons: "spoons-visual", compare: "compare-line", whoBarFill: "who-bar-fill" },
+        grams
+      );
+      setSwapLine("swap-line", drink);
+    },
+  });
+}
+
+function setupFoodCalculator() {
+  setupSearchCalculator({
+    items: FOODS,
+    comboboxId: "food-combobox",
+    inputId: "food-input",
+    listId: "food-list",
+    quantitySelector: "#food-quantity-picker .volume-option",
+    quantityAttr: "qty",
+    getDefaultQuantity: (food) => food.defaultQty,
+    onSelect: (food, qty) => {
+      const grams = Math.round(food.sugarPerUnit * qty);
+      document.getElementById("food-sugar-grams").textContent =
+        `≈ ${grams} г сахара (${qty} шт)`;
+      renderSugarResult(
+        { tsp: "food-sugar-tsp", spoons: "food-spoons-visual", compare: "food-compare-line", whoBarFill: "food-who-bar-fill" },
+        grams
+      );
+      setSwapLine("food-swap-line", food);
+    },
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   setupScroll();
-  setupCalculator();
+  setupDrinkCalculator();
+  setupFoodCalculator();
 });

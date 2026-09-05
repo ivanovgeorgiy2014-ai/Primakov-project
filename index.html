@@ -98,7 +98,7 @@
           </div>
         </div>
 
-        <div class="volume-picker" role="group" aria-label="Объём порции">
+        <div class="volume-picker" id="drink-quantity-picker" role="group" aria-label="Объём порции">
           <span class="volume-label">Сколько выпил?</span>
           <div class="volume-options">
             <button type="button" class="volume-option" data-ml="250">250 мл</button>
@@ -204,6 +204,77 @@
         <p class="chain">
           Пробуем сладкое → выделяется дофамин → чувство удовольствия → хочется ещё
         </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- БЛОК 5. Сладости (интерактив) -->
+  <section id="food" class="section">
+    <div class="container">
+      <div class="section-badge">04</div>
+      <h2 class="section-title">А что на перекус? 🍫</h2>
+      <p class="section-lead">
+        Сахар прячется не только в бутылке — в шоколадках, батончиках и леденцах
+        его не меньше. Выбери, что съел, и посмотри, сколько сахара получилось.
+      </p>
+
+      <div class="calculator">
+        <div class="calculator-controls">
+          <label for="food-input">Выбери сладость</label>
+          <div class="combobox" id="food-combobox">
+            <div class="combobox-field">
+              <span class="combobox-icon" aria-hidden="true">🔍</span>
+              <input
+                type="text"
+                id="food-input"
+                class="combobox-input"
+                role="combobox"
+                aria-expanded="false"
+                aria-controls="food-list"
+                aria-autocomplete="list"
+                autocomplete="off"
+                placeholder="Начни печатать: твикс, чупа-чупс, зефир…"
+              >
+            </div>
+            <ul class="combobox-list" id="food-list" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="volume-picker" id="food-quantity-picker" role="group" aria-label="Количество">
+          <span class="volume-label">Сколько съел?</span>
+          <div class="volume-options">
+            <button type="button" class="volume-option" data-qty="1">1 шт</button>
+            <button type="button" class="volume-option" data-qty="2">2 шт</button>
+            <button type="button" class="volume-option" data-qty="3">3 шт</button>
+            <button type="button" class="volume-option" data-qty="5">5 шт</button>
+            <button type="button" class="volume-option" data-qty="8">8 шт</button>
+            <button type="button" class="volume-option" data-qty="12">12 шт</button>
+          </div>
+        </div>
+
+        <div class="calculator-result">
+          <div class="spoons-visual" id="food-spoons-visual" aria-hidden="true"></div>
+          <p class="result-line">
+            <span class="stat-num" id="food-sugar-tsp">–</span> чайных ложек сахара
+            <span class="result-sub" id="food-sugar-grams"></span>
+          </p>
+          <p class="compare-line" id="food-compare-line"></p>
+          <p class="swap-line" id="food-swap-line"></p>
+        </div>
+        <p class="data-note">
+          Значения приблизительные, усреднённые по открытым данным — у разных
+          брендов и партий цифры могут немного отличаться.
+        </p>
+      </div>
+
+      <div class="who-note">
+        <p>
+          <strong>Ориентир ВОЗ:</strong> не более 6–12 чайных ложек сахара в день
+          из всех продуктов вместе — сладости и напитки складываются друг с другом.
+        </p>
+        <div class="who-bar">
+          <div class="who-bar-fill" id="food-who-bar-fill"></div>
+        </div>
       </div>
     </div>
   </section>
